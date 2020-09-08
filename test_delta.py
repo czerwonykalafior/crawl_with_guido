@@ -3,15 +3,13 @@ from unittest import TestCase, main
 
 
 def get_delta(existing: List[int], new: [Dict[str, List[Dict]]]):
-    result = dict()
-    result['create'] = [item for item in new if item['id'] < 0]
+    result = {'create': [], 'delete': existing.copy()}
 
-    result['delete'] = existing
-
-    for idx, existing_id in enumerate(existing):
-        for new_item in new:
-            if existing_id == new_item['id']:
-                result['delete'].pop(idx)
+    for item in new:
+        if item['id'] < 0:
+            result['create'].append(item)
+        elif item['id'] in existing:
+            result['delete'].remove(item['id'])
 
     return result
 
@@ -54,7 +52,9 @@ class DeltaTestCase(TestCase):
         }
 
         for key, value in dict_1.items():
-            self.assertEqual(get_delta(self.existing_dict[key], dict_1[key]), expected[key])
+            self.assertEqual(expected[key], get_delta(self.existing_dict[key], dict_1[key]))
+
+            print(self.existing_dict[key])
 
 
 if __name__ == '__main__':
